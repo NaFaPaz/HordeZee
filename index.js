@@ -1,8 +1,10 @@
 import * as PIXI from "pixi.js";
-import Victor from "victor";
+import Player from "./player";
+import Zombie from "./zombie";
+import Spawner from "./spawner";
 //import Matter from "matter-js";
 
-let canvasSize = 256;
+const canvasSize = 512;
 const canvas = document.getElementById("mycanvas");
 const app = new PIXI.Application({
   view: canvas,
@@ -11,33 +13,55 @@ const app = new PIXI.Application({
   backgroundColor: 0x5c812f,
 });
 
-let squareWidth = 32;
-const square = new PIXI.Sprite(PIXI.Texture.WHITE);
-square.anchor.set(0.5);
-square.position.set(app.screen.width / 2, app.screen.height / 2);
-square.width = square.height = squareWidth;
-square.tint = 0xea985d;
+let player = new Player({ app });
+let zSpawner = new Spawner({ app, create: () => new Zombie({ app, player }) });
 
-let enemyRadius;
-/////////////
-app.stage.addChild(square);
+let gameStartScene = createScene("Click to Start");
+let gameOverScene = createScene("Game Over");
+app.gameStarted = false;
 
 app.ticker.add((delta) => {
-  const cursorPosition = app.renderer.plugins.interaction.mouse.global;
-  let angle =
-    Math.atan2(cursorPosition.y - square.y, cursorPosition.x - square.x) +
-    Math.PI / 2;
-  square.rotation = angle;
+  gameOverScene.visible = player.dead;
+  gameStartScene.visible = !app.gameStarted;
+  if (!app.gameStarted) return;
+  player.update(delta);
+  zSpawner.spawns.forEach((z) => z.update(delta));
+  bulletHitTest({
+    bullets: player.shooting.bullets,
+    zombies: zSpawner.spawns,
+    bulletRadius: player.shooting.bulletRadius,
+    zombieRadius: 16,
+  });
 });
 
-function randomSpawnPoint() {
-  let edge = Math.floor(Math.random() * 4);
-  let spawnPoint = new Victor(0, 0);
-  switch (edge) {
-    case 0:
-      spawnPoint.x = canvasSize * Math.random();
-      break;
-    default:
-      break;
-  }
+function bulletHitTest({ bullets, zombies, bulletRadius, zombieRadius }) {
+  bullets.forEach((b) => {
+    zombies.forEach((z, index) => {
+      let dx = z.position.x - b.position.x;
+      let dy = z.position.y - b.position.y;
+      let distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance < bulletRadius + zombieRadius) {
+        zombies.splice(index, 1);
+        z.kill();
+      }
+    });
+  });
 }
+
+function createScene(sceneText) {
+  const sceneContainer = new PIXI.Container();
+  const text = new PIXI.Text(sceneText);
+  text.x = app.screen.width / 2;
+  text.y = 0;
+  text.anchor.set(0.5, 0);
+  sceneContainer.zIndex = 1;
+  sceneContainer.addChild(text);
+  app.stage.addChild(sceneContainer);
+  return sceneContainer;
+}
+
+function startGame() {
+  app.gameStarted = true;
+}
+
+document.addEventListener("click", startGame);

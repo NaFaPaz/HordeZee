@@ -9,6 +9,7 @@ export default class Shooting {
     this.bullets = [];
     this.bulletRadius = 8;
     this.maxBullets = 3;
+    this.audio = new Audio("./assets/shoot.mp3");
   }
 
   fire() {

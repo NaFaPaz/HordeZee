@@ -81,9 +81,9 @@ function startGame() {
 
 async function loadAssets() {
   return new Promise((resolve, reject) => {
-    //zombies.forEach((z) => PIXI.Loader.shared.add(`assets/${z}.json`));
+    zombies.forEach((z) => PIXI.Loader.shared.add(`assets/${z}.json`));
     PIXI.Loader.shared.add("assets/hero_male.json");
-    //PIXI.Loader.shared.add("bullet", "assets/bullet.png");
+    PIXI.Loader.shared.add("bullet", "assets/bullet.png");
     PIXI.Loader.shared.onComplete.add(resolve);
     PIXI.Loader.shared.onError.add(reject);
     PIXI.Loader.shared.load();

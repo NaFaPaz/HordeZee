@@ -12,6 +12,8 @@ export default class Shooting {
   }
 
   fire() {
+    this.audio.currentTime = 0;
+    this.audio.play();
     if (this.bullets.length >= this.maxBullets) {
       let b = this.bullets.shift();
       this.app.stage.removeChild(b);

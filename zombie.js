@@ -4,13 +4,13 @@ import { zombies } from "./globals";
 export default class Zombie {
   constructor({ app, player }) {
     this.app = app;
+    const zSpeed = 1;
     this.player = player;
-    this.speed = 1;
     this.zombie = new PIXI.Graphics();
     let r = this.randomSpawnPoint();
 
     let zombieName = zombies[Math.floor(Math.random() * zombies.length)];
-    this.speed = zombieName === "quickzee" ? 1 : 0.25;
+    this.speed = zombieName === "quickzee" ? zSpeed * 2 : zSpeed;
     let sheet =
       PIXI.Loader.shared.resources[`assets/${zombieName}.json`].spritesheet;
     this.die = new PIXI.AnimatedSprite(sheet.animations["die"]);
@@ -21,6 +21,7 @@ export default class Zombie {
     this.zombie.anchor.set(0.5);
     this.zombie.position.set(r.x, r.y);
     app.stage.addChild(this.zombie);
+    this.audio = new Audio("./assets/squelch.mp3");
   }
 
   attackPlayer() {
@@ -49,12 +50,14 @@ export default class Zombie {
   }
 
   kill() {
+    this.audio.currentTime = 0;
+    this.audio.play();
     this.zombie.textures = this.die.textures;
     this.zombie.loop = false;
     this.zombie.onComplete = () =>
-      setTimeout(() => this.app.stage.removeChild(this.zombie), 30000);
+      setTimeout(() => this.app.stage.removeChild(this.zombie), 10000);
     this.zombie.play();
-
+    this.zombie.zIndex = -1;
     clearInterval(this.interval);
   }
   get position() {

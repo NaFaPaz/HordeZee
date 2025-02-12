@@ -43,6 +43,14 @@ export default class Player {
     app.stage.addChild(this.healthBar);
   }
 
+  set scale(s) {
+    this.player.scale.set(s);
+  }
+
+  get scale() {
+    return this.player.scale.x;
+  }
+
   damage() {
     this.health -= 1;
     this.healthBar.width =

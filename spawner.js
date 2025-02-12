@@ -1,3 +1,5 @@
+import GameState from "./game-state";
+
 export default class Spawner {
   constructor({ app, create }) {
     const spawnInterval = 1000;
@@ -9,7 +11,7 @@ export default class Spawner {
   }
 
   spawn() {
-    if (!this.app.gameStarted) return;
+    if (this.app.gameState !== GameState.RUNNING) return;
     if (this.spawns.length >= this.maxSpawn) return;
     let s = this.create();
     this.spawns.push(s);

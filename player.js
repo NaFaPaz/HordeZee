@@ -8,6 +8,9 @@ export default class Player {
 
     let sheet =
       PIXI.Loader.shared.resources["assets/hero_male.json"].spritesheet;
+
+    this.idle = new PIXI.AnimatedSprite(sheet.animations["idle"]);
+    this.shoot = new PIXI.AnimatedSprite(sheet.animations["shoot"]);
     this.player = new PIXI.AnimatedSprite(sheet.animations["idle"]);
     this.player.animationSpeed = 0.1;
     this.player.play();
@@ -19,7 +22,7 @@ export default class Player {
     app.stage.addChild(this.player);
 
     this.lastMouseButton = 0;
-    this.shooting = new Shooting({ app, player: this.player });
+    this.shooting = new Shooting({ app, player: this });
 
     this.maxHealth = 100;
     this.health = this.maxHealth;
@@ -67,9 +70,13 @@ export default class Player {
         cursorPosition.x - this.player.x
       ) +
       Math.PI / 2;
-    this.player.rotation = angle;
+    this.rotation = angle;
+    this.player.scale.x = cursorPosition.x < this.player.position.x ? -1 : 1;
 
     if (mouse.buttons !== this.lastMouseButton) {
+      this.player.textures =
+        mouse.buttons === 0 ? this.idle.textures : this.shoot.textures;
+      this.player.play();
       this.shooting.shoot = mouse.buttons !== 0;
       this.lastMouseButton = mouse.buttons;
     }
